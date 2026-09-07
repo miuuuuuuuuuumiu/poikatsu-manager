@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  /* 基本は白、差し色にやさしいベージュと淡いグリーンを使う */
+  --color-base: #fefdfb;
+  --color-surface: #ffffff;
+  --color-beige: #f3ead9;
+  --color-beige-dark: #e4d3b3;
+  --color-green: #eaf3ea;
+  --color-green-dark: #7fae87;
+  --color-green-text: #3f6b47;
+  --color-ink: #3a3530;
+  --color-ink-soft: #6b6459;
+  --color-line: #ece5d8;
+
+  --color-warn-bg: #fdecec;
+  --color-warn-text: #b3261e;
+  --color-caution-bg: #fff6e0;
+  --color-caution-text: #8a5a00;
+
+  --font-sans: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+/* 下部固定メニューの高さぶん、本文の下に余白を作る */
+.page-scroll-area {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
