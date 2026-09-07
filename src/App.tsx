@@ -16,7 +16,9 @@ function App() {
   }, [])
 
   return (
-    <BrowserRouter>
+    // GitHub Pagesなど、ドメイン直下ではなくサブフォルダ（/poikatsu-manager/ など）で
+    // 公開された場合でも画面遷移が正しく動くよう、Viteのbase設定をbasenameに渡す。
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/projects" element={<ProjectListPage />} />
