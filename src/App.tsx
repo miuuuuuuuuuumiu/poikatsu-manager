@@ -8,6 +8,7 @@ import { ReportPage } from './pages/ReportPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { PointSitesPage } from './pages/PointSitesPage'
 import { TrashPage } from './pages/TrashPage'
+import { UpdateNotification } from './components/UpdateNotification'
 import { seedPointSitesIfEmpty } from './lib/repositories/pointSites'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     // GitHub Pagesなど、ドメイン直下ではなくサブフォルダ（/poikatsu-manager/ など）で
     // 公開された場合でも画面遷移が正しく動くよう、Viteのbase設定をbasenameに渡す。
     <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <UpdateNotification />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/projects" element={<ProjectListPage />} />
