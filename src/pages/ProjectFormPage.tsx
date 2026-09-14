@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../components/layout/AppShell'
 import { Card } from '../components/common/Card'
+import { AutoResizeTextarea } from '../components/common/AutoResizeTextarea'
 import { SaveStatusIndicator } from '../components/common/SaveStatusIndicator'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { EvidenceImages } from '../components/project/EvidenceImages'
@@ -201,7 +202,7 @@ function ProjectFormInner() {
               />
             </Field>
             <Field label="達成条件">
-              <textarea rows={2} value={project.condition} onChange={(e) => updateField('condition', e.target.value)} className={inputClass} />
+              <AutoResizeTextarea rows={2} value={project.condition} onChange={(e) => updateField('condition', e.target.value)} className={inputClass} />
             </Field>
             <Field label="案件カテゴリー">
               <select value={project.category} onChange={(e) => updateField('category', e.target.value)} className={inputClass}>
@@ -217,7 +218,7 @@ function ProjectFormInner() {
               <input type="text" value={project.userName} onChange={(e) => updateField('userName', e.target.value)} className={inputClass} />
             </Field>
             <Field label="メモ">
-              <textarea rows={2} value={project.memo} onChange={(e) => updateField('memo', e.target.value)} className={inputClass} />
+              <AutoResizeTextarea rows={2} value={project.memo} onChange={(e) => updateField('memo', e.target.value)} className={inputClass} />
             </Field>
           </Card>
         )}

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { AppShell } from '../components/layout/AppShell'
 import { Card } from '../components/common/Card'
+import { AutoResizeTextarea } from '../components/common/AutoResizeTextarea'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import {
   createBlankPointSite,
@@ -152,7 +153,7 @@ function SiteEditor({
         />
       </Field>
       <Field label="メモ">
-        <textarea rows={2} value={site.memo} onChange={(e) => onChange({ ...site, memo: e.target.value })} className={inputClass} />
+        <AutoResizeTextarea rows={2} value={site.memo} onChange={(e) => onChange({ ...site, memo: e.target.value })} className={inputClass} />
       </Field>
       <label className="flex items-center gap-2 text-sm font-bold">
         <input

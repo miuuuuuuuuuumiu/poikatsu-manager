@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Card } from '../common/Card'
+import { AutoResizeTextarea } from '../common/AutoResizeTextarea'
 import { ConfirmDialog } from '../common/ConfirmDialog'
 import { WarningIcon } from '../icons'
 import { NotificationSetup } from './NotificationSetup'
@@ -269,7 +270,7 @@ function TaskEditor({
         </select>
       </Field>
       <Field label="メモ">
-        <textarea rows={2} value={task.memo} onChange={(e) => onChange({ ...task, memo: e.target.value })} className={inputClass} />
+        <AutoResizeTextarea rows={2} value={task.memo} onChange={(e) => onChange({ ...task, memo: e.target.value })} className={inputClass} />
       </Field>
       <label className="flex items-center gap-2 text-sm font-bold">
         <input
