@@ -54,6 +54,8 @@ export interface PointSite {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  /** 削除した日時。nullなら通常表示（同期時に安全に削除を伝えるためソフトデリートにしている） */
+  deletedAt: string | null
 }
 
 export interface Project {
@@ -102,6 +104,11 @@ export interface ProjectImage {
   description: string
   blob: Blob
   createdAt: string
+  updatedAt: string
+  /** クラウド同期でアップロード済みになった日時。同期を使わない場合はnullのまま（画面には出さない） */
+  syncedAt: string | null
+  /** 削除した日時。nullなら通常表示（同期時に安全に削除を伝えるためソフトデリートにしている） */
+  deletedAt: string | null
 }
 
 export type TaskPriority = '高' | '中' | '低'
@@ -116,12 +123,27 @@ export interface TaskItem {
   isDone: boolean
   createdAt: string
   updatedAt: string
+  /** 削除した日時。nullなら通常表示（同期時に安全に削除を伝えるためソフトデリートにしている） */
+  deletedAt: string | null
+}
+
+export interface CloudSyncConfig {
+  enabled: boolean
+  webAppUrl: string
+  token: string
+  lastSyncedAt: string | null
 }
 
 export interface AppSettings {
   monthlyGoalAmount: number
   userNames: string[]
   categories: string[]
+  updatedAt: string
+  sync: CloudSyncConfig
+}
+
+export function createDefaultSyncConfig(): CloudSyncConfig {
+  return { enabled: false, webAppUrl: '', token: '', lastSyncedAt: null }
 }
 
 export function createEmptyPersonalInfoUsage(): PersonalInfoUsage {

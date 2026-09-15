@@ -1,4 +1,5 @@
 import { getDB } from '../db'
+import { notifyDataChanged } from '../syncTrigger'
 import { createEmptyPersonalInfoUsage, type Project } from '../../types'
 
 /** 新規登録画面を開いたときの、まだ何も保存していない状態の案件データを作る */
@@ -47,6 +48,7 @@ export async function saveProject(project: Project): Promise<void> {
   const db = await getDB()
   const toSave: Project = { ...project, updatedAt: new Date().toISOString() }
   await db.put('projects', toSave)
+  notifyDataChanged()
 }
 
 export async function getProject(id: string): Promise<Project | undefined> {
@@ -61,6 +63,18 @@ export async function listActiveProjects(): Promise<Project[]> {
   return all
     .filter((p) => !p.deletedAt)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+}
+
+/** クラウド同期用：ゴミ箱の案件も含めた全件を取得する */
+export async function listAllProjects(): Promise<Project[]> {
+  const db = await getDB()
+  return db.getAll('projects')
+}
+
+/** クラウド同期用：updatedAtを上書きせず、渡された内容をそのまま保存する（マージ結果を保存するため） */
+export async function putProjectRaw(project: Project): Promise<void> {
+  const db = await getDB()
+  await db.put('projects', project)
 }
 
 export async function listTrashedProjects(): Promise<Project[]> {
@@ -78,6 +92,7 @@ export async function moveProjectToTrash(id: string): Promise<void> {
   if (!project) return
   const now = new Date().toISOString()
   await db.put('projects', { ...project, deletedAt: now, updatedAt: now })
+  notifyDataChanged()
 }
 
 export async function restoreProjectFromTrash(id: string): Promise<void> {
@@ -86,12 +101,14 @@ export async function restoreProjectFromTrash(id: string): Promise<void> {
   if (!project) return
   const now = new Date().toISOString()
   await db.put('projects', { ...project, deletedAt: null, updatedAt: now })
+  notifyDataChanged()
 }
 
 /** ゴミ箱から完全に削除する（元に戻せない） */
 export async function purgeProject(id: string): Promise<void> {
   const db = await getDB()
   await db.delete('projects', id)
+  notifyDataChanged()
 }
 
 /**
@@ -129,5 +146,6 @@ export async function importProjectsFromCsv(rows: Project[]): Promise<{ created:
       created++
     }
   }
+  notifyDataChanged()
   return { created, updated }
 }

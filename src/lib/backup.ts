@@ -2,6 +2,7 @@
 // 画像（Blob）はJSONに直接入れられないため、base64のデータURL文字列に変換して保存する。
 import { getDB } from './db'
 import { getSettings, saveSettings } from './repositories/settings'
+import { blobToDataUrl, dataUrlToBlob } from './blobEncoding'
 import type { AppSettings, ImageKind, PointSite, Project, TaskItem } from '../types'
 
 export const BACKUP_VERSION = 1
@@ -23,25 +24,6 @@ export interface BackupData {
   tasks: TaskItem[]
   settings: AppSettings
   images: BackupImage[]
-}
-
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('画像の読み込みに失敗しました'))
-    reader.readAsDataURL(blob)
-  })
-}
-
-function dataUrlToBlob(dataUrl: string): Blob {
-  const [header, base64] = dataUrl.split(',')
-  const mimeMatch = /data:(.*);base64/.exec(header)
-  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream'
-  const binary = atob(base64)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return new Blob([bytes], { type: mime })
 }
 
 export async function buildBackup(): Promise<BackupData> {
@@ -108,6 +90,10 @@ export async function restoreBackup(data: BackupData): Promise<void> {
       kind: img.kind,
       description: img.description,
       createdAt: img.createdAt,
+      // 同期機能を追加する前のバックアップファイルにはこれらの項目が無いため、既定値で補う
+      updatedAt: img.createdAt,
+      syncedAt: null,
+      deletedAt: null,
       blob: dataUrlToBlob(img.dataUrl),
     })
   }

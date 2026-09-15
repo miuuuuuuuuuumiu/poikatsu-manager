@@ -39,8 +39,8 @@ describe('profitBySite / profitByCategory', () => {
       project({ pointSiteId: 'siteB', category: 'クレジットカード', confirmedPoints: 200, yenPerPointOverride: 1 }),
     ]
     const bySite = profitBySite(projects, [
-      { id: 'siteA', name: 'サイトA', pointsPerYen: 1, inquiryUrl: '', memo: '', isActive: true, createdAt: '', updatedAt: '' },
-      { id: 'siteB', name: 'サイトB', pointsPerYen: 1, inquiryUrl: '', memo: '', isActive: true, createdAt: '', updatedAt: '' },
+      { id: 'siteA', name: 'サイトA', pointsPerYen: 1, inquiryUrl: '', memo: '', isActive: true, createdAt: '', updatedAt: '', deletedAt: null },
+      { id: 'siteB', name: 'サイトB', pointsPerYen: 1, inquiryUrl: '', memo: '', isActive: true, createdAt: '', updatedAt: '', deletedAt: null },
     ])
     expect(bySite[0]).toEqual({ key: 'siteA', label: 'サイトA', profit: 1500, count: 2 })
     expect(bySite[1]).toEqual({ key: 'siteB', label: 'サイトB', profit: 200, count: 1 })

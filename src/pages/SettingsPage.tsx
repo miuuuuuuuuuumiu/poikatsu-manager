@@ -12,6 +12,7 @@ import { buildBackup, isValidBackup, restoreBackup, type BackupData } from '../l
 import { clearAllData } from '../lib/repositories/maintenance'
 import { deleteSampleProjects, insertSampleProjects } from '../lib/sampleData'
 import { downloadFile, timestampForFilename } from '../lib/downloadFile'
+import { syncNow, testConnection } from '../lib/cloudSync'
 import type { AppSettings } from '../types'
 
 type Message = { type: 'success' | 'error'; text: string }
@@ -23,6 +24,8 @@ export function SettingsPage() {
   const [deleteStep2Open, setDeleteStep2Open] = useState(false)
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [newUserName, setNewUserName] = useState('')
+  const [syncBusy, setSyncBusy] = useState(false)
+  const [syncMessage, setSyncMessage] = useState<Message | null>(null)
 
   useEffect(() => {
     void getSettings().then(setSettings)
@@ -54,6 +57,37 @@ export function SettingsPage() {
     const next: AppSettings = { ...settings, userNames: settings.userNames.filter((n) => n !== name) }
     setSettings(next)
     await saveSettings(next)
+  }
+
+  async function updateSyncField<K extends keyof AppSettings['sync']>(key: K, value: AppSettings['sync'][K]) {
+    const current = settings ?? (await getSettings())
+    const next: AppSettings = { ...current, sync: { ...current.sync, [key]: value } }
+    setSettings(next)
+    await saveSettings(next)
+  }
+
+  async function handleTestConnection() {
+    if (!settings) return
+    setSyncBusy(true)
+    setSyncMessage(null)
+    try {
+      const result = await testConnection(settings.sync.webAppUrl, settings.sync.token)
+      setSyncMessage({ type: result.ok ? 'success' : 'error', text: result.message })
+    } finally {
+      setSyncBusy(false)
+    }
+  }
+
+  async function handleSyncNow() {
+    setSyncBusy(true)
+    setSyncMessage(null)
+    try {
+      const result = await syncNow()
+      setSyncMessage({ type: result.ok ? 'success' : 'error', text: result.message })
+      setSettings(await getSettings())
+    } finally {
+      setSyncBusy(false)
+    }
   }
 
   async function handleExportCsv() {
@@ -224,6 +258,88 @@ export function SettingsPage() {
                   ))}
                 </div>
               )}
+            </div>
+          </Card>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-sm font-bold text-[var(--color-ink-soft)]">クラウド同期（PC⇔スマホ）</h2>
+          <Card className="space-y-4">
+            <p className="text-xs text-[var(--color-ink-soft)]">
+              無料のGoogleアカウントを使って、パソコンとスマホなど複数の端末でデータを自動的に合わせられます。設定しなくてもアプリは通常通り使えます。手順は
+              <a
+                href="https://github.com/miuuuuuuuuuumiu/poikatsu-manager#5-pcとスマホの自動同期（任意）"
+                target="_blank"
+                rel="noreferrer"
+                className="mx-1 underline"
+              >
+                README
+              </a>
+              をご覧ください。
+            </p>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-bold text-[var(--color-ink-soft)]">Web AppのURL</span>
+              <input
+                type="url"
+                placeholder="https://script.google.com/macros/s/.../exec"
+                value={settings?.sync.webAppUrl ?? ''}
+                onChange={(e) => void updateSyncField('webAppUrl', e.target.value)}
+                className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-green-dark)]"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-bold text-[var(--color-ink-soft)]">合言葉（トークン）</span>
+              <input
+                type="text"
+                value={settings?.sync.token ?? ''}
+                onChange={(e) => void updateSyncField('token', e.target.value)}
+                className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-green-dark)]"
+              />
+            </label>
+
+            <label className="flex items-center gap-2 text-sm font-bold">
+              <input
+                type="checkbox"
+                checked={settings?.sync.enabled ?? false}
+                onChange={(e) => void updateSyncField('enabled', e.target.checked)}
+                className="h-4 w-4 accent-[var(--color-green-dark)]"
+              />
+              自動同期を有効にする
+            </label>
+
+            {syncMessage && (
+              <p
+                className={`text-xs font-bold ${
+                  syncMessage.type === 'success' ? 'text-[var(--color-green-text)]' : 'text-[var(--color-warn-text)]'
+                }`}
+              >
+                {syncMessage.text}
+              </p>
+            )}
+
+            <p className="text-xs text-[var(--color-ink-soft)]">
+              {settings?.sync.lastSyncedAt
+                ? `最終同期：${new Date(settings.sync.lastSyncedAt).toLocaleString('ja-JP')}`
+                : 'まだ同期していません'}
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                disabled={syncBusy || !settings?.sync.webAppUrl || !settings.sync.token}
+                onClick={handleTestConnection}
+                className="flex-1 rounded-xl border border-[var(--color-line)] py-2.5 text-sm font-bold disabled:opacity-50"
+              >
+                接続テスト
+              </button>
+              <button
+                disabled={syncBusy || !settings?.sync.enabled}
+                onClick={handleSyncNow}
+                className="flex-1 rounded-xl bg-[var(--color-green-dark)] py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              >
+                今すぐ同期
+              </button>
             </div>
           </Card>
         </section>

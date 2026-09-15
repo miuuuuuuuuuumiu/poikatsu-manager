@@ -10,11 +10,14 @@ import { PointSitesPage } from './pages/PointSitesPage'
 import { TrashPage } from './pages/TrashPage'
 import { UpdateNotification } from './components/UpdateNotification'
 import { seedPointSitesIfEmpty } from './lib/repositories/pointSites'
+import { useCloudSync } from './hooks/useCloudSync'
 
 function App() {
   useEffect(() => {
     void seedPointSitesIfEmpty()
   }, [])
+
+  useCloudSync()
 
   return (
     // GitHub Pagesなど、ドメイン直下ではなくサブフォルダ（/poikatsu-manager/ など）で
